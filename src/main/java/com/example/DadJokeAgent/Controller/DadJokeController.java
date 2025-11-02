@@ -24,11 +24,10 @@ public class DadJokeController {
     @PostMapping(value = "/hook", consumes = "application/json", produces = "application/json")
 
     public Map<String , Object> handleTelexMsg(@RequestBody (required = false)Map<String , Object>payload,  HttpServletRequest request){
-        System.out.println("---- Incoming Request Details ----");
-        System.out.println("HTTP Method: " + request.getMethod());
-        System.out.println("Request URI: " + request.getRequestURI());
-        System.out.println("Content-Type: " + request.getContentType());
-        System.out.println("----------------------------------");
+
+        String jsonrpc = String.valueOf(payload.getOrDefault("jsonrpc", "2.0"));
+        String id = String.valueOf(payload.getOrDefault("id", "1"));
+
         String userText = String.valueOf(payload.getOrDefault("text", "")).toLowerCase();
 
         String responseText;
@@ -43,10 +42,17 @@ public class DadJokeController {
 
 
 
-        Map<String , Object> response= new HashMap<>();
-        response.put("status" , "success");
-        response.put("message" , responseText);
-        response.put("type", "text");
+        Map<String , Object> result= new HashMap<>();
+        result.put("status" , "success");
+        result.put("message" , responseText);
+        result.put("type", "text");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("jsonrpc", jsonrpc);
+        response.put("id", id);
+        response.put("result", result);
+
+        System.out.println("Outgoing response: " + response);
 
         return response;
     }

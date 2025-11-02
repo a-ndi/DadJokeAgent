@@ -1,15 +1,13 @@
 package com.example.DadJokeAgent.Controller;
 
-
 import com.example.DadJokeAgent.Service.DadJokeService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+// Removed unnecessary imports for HttpServletRequest and Objects
 
 @RestController
 @RequestMapping("/joker")
@@ -21,14 +19,11 @@ public class DadJokeController {
         this.dadJokeService = dadJokeService;
     }
 
-
-
     @SuppressWarnings("unchecked")
     @PostMapping(value = "/hook", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Map<String, Object>> handleTelexMsg(@RequestBody Map<String, Object> payload) {
-        // Extract text properly from A2A JSON
+        // Extract text properly from A2A JSON (Logic remains the same)
         String userText = "";
-
         try {
             Map<String, Object> params = (Map<String, Object>) payload.get("params");
             if (params != null && params.get("message") instanceof Map<?, ?> messageMap) {
@@ -44,7 +39,6 @@ public class DadJokeController {
             System.out.println("Error parsing user text: " + e.getMessage());
         }
 
-        // Debug log
         System.out.println(" Incoming user text: '" + userText + "'");
 
         String responseText;
@@ -63,26 +57,15 @@ public class DadJokeController {
                 "kind", "message"
         );
 
-        Map<String, Object> status = Map.of(
-                "state", "completed",
-                "timestamp", java.time.Instant.now().toString(),
-                "message", messageObject
-        );
 
-        Map<String, Object> result = Map.of(
-                "id", java.util.UUID.randomUUID().toString(),
-                "contextId", java.util.UUID.randomUUID().toString(),
-                "status", status,
-                "kind", "task"
-        );
+        Object incomingId = payload.getOrDefault("id", null);
 
-        Map<String, Object> response = Map.of(
-                "jsonrpc", "2.0",
-                "id", payload.getOrDefault("id", null),
-                "result", result
-        );
+        Map<String, Object> response = new HashMap<>();
+        response.put("jsonrpc", "2.0");
+        response.put("id", incomingId);
+        response.put("result", messageObject);
 
-        System.out.println("Outgoing response: " + response);
+        System.out.println(" Outgoing A2A response: " + response);
 
         return ResponseEntity.ok()
                 .header("Connection", "close")
@@ -91,10 +74,7 @@ public class DadJokeController {
 
 
     @GetMapping("/health")
-
     public String healthCheck(){
         return "DadJokeAgent is running!";
     }
-
-
 }

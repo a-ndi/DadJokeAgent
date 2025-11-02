@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("joker")
+@RequestMapping("/joker")
 public class DadJokeController {
 
     private final DadJokeService dadJokeService;

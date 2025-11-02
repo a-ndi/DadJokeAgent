@@ -24,9 +24,11 @@ public class DadJokeController {
     @PostMapping(value = "/hook", consumes = "application/json", produces = "application/json")
 
     public Map<String , Object> handleTelexMsg(@RequestBody (required = false)Map<String , Object>payload,  HttpServletRequest request){
+        System.out.println("---- Incoming Request Details ----");
         System.out.println("HTTP Method: " + request.getMethod());
-        System.out.println("Payload: " + payload);
-
+        System.out.println("Request URI: " + request.getRequestURI());
+        System.out.println("Content-Type: " + request.getContentType());
+        System.out.println("----------------------------------");
         String userText = String.valueOf(payload.getOrDefault("text", "")).toLowerCase();
 
         String responseText;

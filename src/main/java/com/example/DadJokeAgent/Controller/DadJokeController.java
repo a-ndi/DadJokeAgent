@@ -20,7 +20,7 @@ public class DadJokeController {
 
 
 
-    @PostMapping("/hook")
+    @PostMapping(value = "/hook", consumes = "application/json", produces = "application/json")
 
     public Map<String , Object> handleTelexMsg(@RequestBody Map<String , Object>payload){
 

@@ -2,6 +2,7 @@ package com.example.DadJokeAgent.Controller;
 
 
 import com.example.DadJokeAgent.Service.DadJokeService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -22,7 +23,9 @@ public class DadJokeController {
 
     @PostMapping(value = "/hook", consumes = "application/json", produces = "application/json")
 
-    public Map<String , Object> handleTelexMsg(@RequestBody Map<String , Object>payload){
+    public Map<String , Object> handleTelexMsg(@RequestBody (required = false)Map<String , Object>payload,  HttpServletRequest request){
+        System.out.println("HTTP Method: " + request.getMethod());
+        System.out.println("Payload: " + payload);
 
         String userText = String.valueOf(payload.getOrDefault("text", "")).toLowerCase();
 

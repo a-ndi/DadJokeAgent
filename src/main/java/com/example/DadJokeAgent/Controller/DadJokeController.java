@@ -7,7 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-// Removed unnecessary imports for HttpServletRequest and Objects
+import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/joker")
@@ -19,10 +20,12 @@ public class DadJokeController {
         this.dadJokeService = dadJokeService;
     }
 
+
     @SuppressWarnings("unchecked")
     @PostMapping(value = "/hook", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Map<String, Object>> handleTelexMsg(@RequestBody Map<String, Object> payload) {
-        // Extract text properly from A2A JSON (Logic remains the same)
+
+
         String userText = "";
         try {
             Map<String, Object> params = (Map<String, Object>) payload.get("params");
@@ -36,20 +39,28 @@ public class DadJokeController {
                 }
             }
         } catch (Exception e) {
-            System.out.println("Error parsing user text: " + e.getMessage());
+            System.out.println(" Error parsing user text: " + e.getMessage());
         }
 
         System.out.println(" Incoming user text: '" + userText + "'");
 
         String responseText;
-        if (userText.isEmpty() || userText.equals("null")) {
-            responseText = "I didn’t receive any message. Please include some text, e.g. 'tell me a joke'.";
-        } else if (userText.contains("joke") || userText.contains("funny")) {
-            responseText = dadJokeService.getRandomJoke();
-        } else {
-            responseText = "Hey there! Ask me for a dad joke (try typing 'tell me a joke')";
+        try {
+            if (userText.isEmpty() || userText.equals("null")) {
+                responseText = "I didn’t receive any message. Please include some text, e.g. 'tell me a joke'.";
+            } else if (userText.contains("joke") || userText.contains("funny")) {
+                responseText = dadJokeService.getRandomJoke();
+            } else {
+                responseText = "Hey there! Ask me for a dad joke (try typing 'tell me a joke')";
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching dad joke: " + e.getMessage());
+            responseText = "Oops! My humor engine broke  Try again later.";
         }
 
+
+
+        //  Build the A2A Message Object
         Map<String, Object> messagePart = Map.of("kind", "text", "text", responseText);
         Map<String, Object> messageObject = Map.of(
                 "role", "agent",
@@ -58,23 +69,26 @@ public class DadJokeController {
         );
 
 
-        Object incomingId = payload.getOrDefault("id", null);
 
         Map<String, Object> response = new HashMap<>();
         response.put("jsonrpc", "2.0");
-        response.put("id", incomingId);
-        response.put("result", messageObject);
+        response.put("id", payload.getOrDefault("id", UUID.randomUUID().toString())); // Echo the ID
+        response.put("result", messageObject); // <-- CRITICAL FIX: Direct placement of Message object
 
-        System.out.println(" Outgoing A2A response: " + response);
+        System.out.println("Outgoing A2A response: " + response);
 
         return ResponseEntity.ok()
                 .header("Connection", "close")
                 .body(response);
     }
 
-
     @GetMapping("/health")
     public String healthCheck(){
         return "DadJokeAgent is running!";
+    }
+
+    @GetMapping("/hook")
+    public String handleHookGet() {
+        return "DadJokeAgent is alive! Please send a POST request to /joker/hook for jokes ";
     }
 }
